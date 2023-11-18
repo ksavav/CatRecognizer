@@ -9,7 +9,7 @@ img_height = 180
 img_width = 180
 
 # path to dataset
-path = 'C:/Users/axawe/Desktop/Projects/CatsRecognizer/Dataset/Cats'
+path = 'C:/Users/axawe/Desktop/Projects/CatsRecognizer/Dataset/Cats/test'
 
 # tests_images = {'russian': 'E:/Desktop/russianblue.jpg',
 #                 'egypt': 'E:/Desktop/egypt.jpg'}
@@ -92,7 +92,7 @@ model.compile(optimizer='adam',
 model.summary()
 
 # training
-epochs = 10
+epochs = 2
 history = model.fit(train_ds, validation_data=val_ds, epochs=epochs)
 
 # plots

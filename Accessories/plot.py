@@ -2,8 +2,8 @@ import matplotlib.pyplot as plt
 
 
 class Plot:
-    def __init__(self, history, epochs_range):
-        self.epochs = epochs_range
+    def __init__(self, history, epochs):
+        self.epochs = range(epochs)
         self.acc = history.history['accuracy']
         self.val_acc = history.history['val_accuracy']
         self.loss = history.history['loss']
@@ -19,7 +19,6 @@ class Plot:
 
     def plot_acc(self):
         plt.figure(figsize=(8, 8))
-        plt.subplot(1, 2, 1)
         plt.plot(self.epochs, self.acc, label='Training Accuracy')
         plt.plot(self.epochs, self.val_acc, label='Validation Accuracy')
         plt.legend(loc='lower right')
