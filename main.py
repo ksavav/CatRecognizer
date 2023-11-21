@@ -2,29 +2,17 @@ import numpy as np
 import tensorflow as tf
 import keras
 import CatRecognizer.Accessories.plot as plt
+import Architectures.Xception as xc
+import Architectures.AlexNet as alex
 
 # const values
 batch_size = 32
-img_height = 180
-img_width = 180
+img_height = 299
+img_width = 299
 
 # path to dataset
-path = 'C:/Users/axawe/Desktop/Projects/CatsRecognizer/Dataset/Cats/test'
+path = 'E:/Desktop/PGa/Semestr_9/PUG/Datasets/Cats/test'
 
-# tests_images = {'russian': 'E:/Desktop/russianblue.jpg',
-#                 'egypt': 'E:/Desktop/egypt.jpg'}
-#
-# img_array = []
-
-# for key in tests_images:
-#     img = tf.keras.utils.load_img(
-#         tests_images[key], target_size=(img_height, img_width)
-#     )
-#
-#     xd = tf.keras.utils.img_to_array(img)
-#     xd = tf.expand_dims(xd, 0)  # Create a batch
-#
-#     img_array.append(xd)
 
 # splitting dataset into training, validation and test set
 train_ds = keras.utils.image_dataset_from_directory(
@@ -46,15 +34,15 @@ val_ds = keras.utils.image_dataset_from_directory(
 class_names = train_ds.class_names
 print(class_names)
 
-# for image_batch, labels_batch in train_ds:
-#   print(image_batch.shape)
-#   print(labels_batch.shape)
-#   break
+for image_batch, labels_batch in train_ds:
+    print(image_batch.shape)
+    print(labels_batch.shape)
+    break
 
 AUTOTUNE = tf.data.AUTOTUNE
 
-train_ds = train_ds.cache().shuffle(1000).prefetch(buffer_size=AUTOTUNE)
-val_ds = val_ds.cache().prefetch(buffer_size=AUTOTUNE)
+train_ds = train_ds.prefetch(buffer_size=AUTOTUNE)
+val_ds = val_ds.prefetch(buffer_size=AUTOTUNE)
 
 num_classes = len(class_names)
 
@@ -69,21 +57,13 @@ data_augmentation = keras.Sequential(
     ]
 )
 
-# structure of the model layers
-model = keras.models.Sequential([
-    data_augmentation,
-    keras.layers.Rescaling(1. / 255),
-    keras.layers.Conv2D(16, 3, padding='same', activation='relu'),
-    keras.layers.MaxPooling2D(),
-    keras.layers.Conv2D(32, 3, padding='same', activation='relu'),
-    keras.layers.MaxPooling2D(),
-    keras.layers.Conv2D(64, 3, padding='same', activation='relu'),
-    keras.layers.MaxPooling2D(),
-    keras.layers.Dropout(0.2),
-    keras.layers.Flatten(),
-    keras.layers.Dense(128, activation='relu'),
-    keras.layers.Dense(num_classes)
-])
+# AlexNet
+# alexnet = alex.AlexNet(train_ds.element_spec[0].shape)
+# model = alexnet.get_model()
+
+# Xception
+xception = xc.Xception(img_height, img_width)
+model = xception.get_model()
 
 model.compile(optimizer='adam',
               loss=keras.losses.SparseCategoricalCrossentropy(from_logits=True),
@@ -92,7 +72,7 @@ model.compile(optimizer='adam',
 model.summary()
 
 # training
-epochs = 2
+epochs = 25
 history = model.fit(train_ds, validation_data=val_ds, epochs=epochs)
 
 # plots
