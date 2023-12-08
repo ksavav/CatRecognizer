@@ -6,8 +6,9 @@ from keras import Model
 
 
 class Xception:
-    def __init__(self, img_height, img_width):
+    def __init__(self, img_height, img_width, filters_num):
         input = Input(shape=(img_height, img_width, 3))
+        self.filters = filters_num
         x = self.entry_flow(input)
         x = self.middle_flow(x)
         output = self.exit_flow(x)
@@ -62,12 +63,12 @@ class Xception:
         x = Add()([tensor, x])
 
         x = ReLU()(x)
-        x = self.sep_bn(x, filters=728, kernel_size=3)
+        x = self.sep_bn(x, filters=self.filters, kernel_size=3)
         x = ReLU()(x)
-        x = self.sep_bn(x, filters=728, kernel_size=3)
+        x = self.sep_bn(x, filters=self.filters, kernel_size=3)
         x = MaxPool2D(pool_size=3, strides=2, padding='same')(x)
 
-        tensor = self.conv_bn(tensor, filters=728, kernel_size=1, strides=2)
+        tensor = self.conv_bn(tensor, filters=self.filters, kernel_size=1, strides=2)
         x = Add()([tensor, x])
         return x
 
@@ -75,11 +76,11 @@ class Xception:
     def middle_flow(self, tensor):
         for _ in range(8):
             x = ReLU()(tensor)
-            x = self.sep_bn(x, filters=728, kernel_size=3)
+            x = self.sep_bn(x, filters=self.filters, kernel_size=3)
             x = ReLU()(x)
-            x = self.sep_bn(x, filters=728, kernel_size=3)
+            x = self.sep_bn(x, filters=self.filters, kernel_size=3)
             x = ReLU()(x)
-            x = self.sep_bn(x, filters=728, kernel_size=3)
+            x = self.sep_bn(x, filters=self.filters, kernel_size=3)
             x = ReLU()(x)
             tensor = Add()([tensor, x])
 
@@ -88,7 +89,7 @@ class Xception:
     # exit flow
     def exit_flow(self, tensor):
         x = ReLU()(tensor)
-        x = self.sep_bn(x, filters=728, kernel_size=3)
+        x = self.sep_bn(x, filters=self.filters, kernel_size=3)
         x = ReLU()(x)
         x = self.sep_bn(x, filters=1024, kernel_size=3)
         x = MaxPool2D(pool_size=3, strides=2, padding='same')(x)
