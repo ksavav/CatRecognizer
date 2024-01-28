@@ -1,14 +1,17 @@
-from keras.layers import Input, Dense, Conv2D, Add
+from keras.layers import Input, Dense, Conv2D, Add, Dropout
 from keras.layers import SeparableConv2D, ReLU
 from keras.layers import BatchNormalization, MaxPool2D
 from keras.layers import GlobalAvgPool2D
-from keras import Model
+from keras import Model, Sequential, layers
 
 
 class Xception:
-    def __init__(self, img_height, img_width, filters_num):
+    def __init__(self, img_height, img_width, filters_num, dropout_rate):
         input = Input(shape=(img_height, img_width, 3))
+        self.img_height = img_height
+        self.img_width = img_width
         self.filters = filters_num
+        self.dropout_rate = dropout_rate
         x = self.entry_flow(input)
         x = self.middle_flow(x)
         output = self.exit_flow(x)
@@ -25,6 +28,7 @@ class Xception:
                    strides=strides,
                    padding='same',
                    use_bias=False)(x)
+        x = Dropout(self.dropout_rate)(x)
         x = BatchNormalization()(x)
         return x
 
@@ -40,6 +44,18 @@ class Xception:
 
     # entry flow
     def entry_flow(self, x):
+        data_augmentation = Sequential(
+            [
+                layers.RandomFlip("horizontal",
+                                  input_shape=(self.img_height,
+                                               self.img_width,
+                                               3)),
+                layers.RandomRotation(0.1),
+                layers.RandomZoom(0.1)
+            ]
+        )
+
+        x = data_augmentation(x)
         x = self.conv_bn(x, filters=32, kernel_size=3, strides=2)
         x = ReLU()(x)
         x = self.conv_bn(x, filters=64, kernel_size=3, strides=1)
@@ -49,6 +65,7 @@ class Xception:
         x = ReLU()(x)
         x = self.sep_bn(x, filters=128, kernel_size=3)
         x = MaxPool2D(pool_size=3, strides=2, padding='same')(x)
+        x = Dropout(self.dropout_rate)(x)
 
         tensor = self.conv_bn(tensor, filters=128, kernel_size=1, strides=2)
         x = Add()([tensor, x])
@@ -58,6 +75,7 @@ class Xception:
         x = ReLU()(x)
         x = self.sep_bn(x, filters=256, kernel_size=3)
         x = MaxPool2D(pool_size=3, strides=2, padding='same')(x)
+        x = Dropout(self.dropout_rate)(x)
 
         tensor = self.conv_bn(tensor, filters=256, kernel_size=1, strides=2)
         x = Add()([tensor, x])
@@ -67,6 +85,7 @@ class Xception:
         x = ReLU()(x)
         x = self.sep_bn(x, filters=self.filters, kernel_size=3)
         x = MaxPool2D(pool_size=3, strides=2, padding='same')(x)
+        x = Dropout(self.dropout_rate)(x)
 
         tensor = self.conv_bn(tensor, filters=self.filters, kernel_size=1, strides=2)
         x = Add()([tensor, x])
@@ -93,6 +112,7 @@ class Xception:
         x = ReLU()(x)
         x = self.sep_bn(x, filters=1024, kernel_size=3)
         x = MaxPool2D(pool_size=3, strides=2, padding='same')(x)
+        x = Dropout(self.dropout_rate)(x)
 
         tensor = self.conv_bn(tensor, filters=1024, kernel_size=1, strides=2)
         x = Add()([tensor, x])
