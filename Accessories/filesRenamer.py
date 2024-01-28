@@ -3,8 +3,8 @@ import os
 
 class FileRenamer:
     @staticmethod
-    def change_filenames_in_folder(path='C:/Users/axawe/Desktop/Projects/CatsRecognizer/Dataset/Cats',
-                                   new_path='C:/Users/axawe/Desktop/Projects/CatsRecognizer/Dataset/NewCats'):
+    def change_filenames_in_folder(path='E:/Desktop/PGa/Semestr_9/PUG/Datasets/Cats/test/',
+                                   new_path='E:/Desktop/PGa/Semestr_9/PUG/Datasets/Cats/test_watermark/'):
         breeds = os.listdir(path)
 
         for breed in breeds:
@@ -18,3 +18,8 @@ class FileRenamer:
                 i += 1
 
             print(len(filenames))
+
+
+if __name__ == '__main__':
+    fr = FileRenamer()
+    fr.change_filenames_in_folder()
